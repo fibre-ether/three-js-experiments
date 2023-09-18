@@ -1,5 +1,6 @@
 import { Points } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
+import { useControls } from "leva";
 import { buffer } from "maath";
 import { useEffect, useRef, useState } from "react";
 import { MathUtils, Quaternion, Vector3 } from "three";
@@ -74,7 +75,14 @@ function CustomPoints() {
     makeBuffer({ length: n }, () => Math.random() * 0.2)
   );
 
-  const damping = 0.03;
+  const { damping } = useControls({
+    damping: {
+      value: 0.05,
+      min: 0.01,
+      max: 0.1,
+      step: 0.01,
+    },
+  });
   let currentScroll = 0;
 
   useFrame((_, delta) => {
