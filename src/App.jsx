@@ -20,6 +20,21 @@ function App() {
         <div className="lorem-text">{loremText}</div>
       </div>
 
+      <div className="attributions">
+        <a
+          href="https://github.com/fibre-ether"
+          target="_blank"
+          rel={"noreferrer noopener"}>
+          @fibre-ether
+        </a>
+        <a
+          href="https://github.com/fibre-ether/three-js-experiments"
+          target="_blank"
+          rel={"noreferrer noopener"}>
+          Code
+        </a>
+      </div>
+
       <Canvas
         style={{
           height: "100vh",
