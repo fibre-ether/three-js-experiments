@@ -1,7 +1,7 @@
-import { Points, useScroll } from "@react-three/drei";
+import { Points } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { buffer } from "maath";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { MathUtils, Quaternion, Vector3 } from "three";
 
 const makeBuffer = (...args) => Float32Array.from(...args);
@@ -54,7 +54,17 @@ function CustomPoints() {
     ];
   }
 
-  const scroll = useScroll();
+  let scroll = useRef(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      scroll.current = window.scrollY / window.innerHeight;
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
 
   const [positionA] = useState(() => makeBuffer(cubePosition));
   const [positionB] = useState(() => makeBuffer(spherePosition));
@@ -64,15 +74,22 @@ function CustomPoints() {
     makeBuffer({ length: n }, () => Math.random() * 0.2)
   );
 
+  const damping = 0.03;
+  let currentScroll = 0;
+
   useFrame((_, delta) => {
-    const r1 = scroll.range(0, 1);
-    // const et = clock.getElapsedTime();
-    // const t = misc.remap(Math.sin(et), [-1, 1], [0, 1]);
-    buffer.lerp(colorA, colorB, color, r1);
-    buffer.lerp(positionA, positionB, positionFinal, r1);
+    const r1 = scroll.current;
+
+    currentScroll += Math.floor((r1 - currentScroll) * damping * 1000) / 1000;
+
+    buffer.lerp(colorA, colorB, color, currentScroll);
+
+    buffer.lerp(positionA, positionB, positionFinal, currentScroll);
+
     buffer.rotate(positionA, {
       q: q.setFromAxisAngle(rotationAxis, delta),
     });
+
     buffer.rotate(positionB, {
       q: q.setFromAxisAngle(negativeRotationAxis, delta),
     });
@@ -81,7 +98,7 @@ function CustomPoints() {
   return (
     <>
       <Points positions={positionFinal} colors={color} sizes={size}>
-        {/* eslint-disable-net */}
+        {/* eslint-disable-next-line */}
         <pointsMaterial vertexColors size={0.75} />
       </Points>
     </>
