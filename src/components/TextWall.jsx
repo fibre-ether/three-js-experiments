@@ -13,7 +13,7 @@ function TextWall() {
         font="https://fonts.gstatic.com/s/raleway/v14/1Ptrg8zYS_SKggPNwK4vaqI.woff"
         textAlign={"justify"}
         anchorX={"right"}
-        position={[-10, -25, 0]}>
+        position={[-10, -45, 0]}>
         {loremText}
       </Text>
       <Text
@@ -24,7 +24,7 @@ function TextWall() {
         letterSpacing={0.02}
         font="https://fonts.gstatic.com/s/raleway/v14/1Ptrg8zYS_SKggPNwK4vaqI.woff"
         textAlign={"justify"}
-        position={[0, -25, 0]}>
+        position={[0, -45, 0]}>
         {scrollText}
       </Text>
       <Text
@@ -36,7 +36,7 @@ function TextWall() {
         font="https://fonts.gstatic.com/s/raleway/v14/1Ptrg8zYS_SKggPNwK4vaqI.woff"
         textAlign={"justify"}
         anchorX={"left"}
-        position={[10, -25, 0]}>
+        position={[10, -45, 0]}>
         {loremText}
       </Text>
     </group>

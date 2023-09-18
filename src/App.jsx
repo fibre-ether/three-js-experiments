@@ -1,7 +1,6 @@
 import {
   Bounds,
   Environment,
-  OrbitControls,
   PerspectiveCamera,
   Scroll,
   ScrollControls,
