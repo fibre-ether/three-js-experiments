@@ -1,25 +1,53 @@
-import {
-  Bounds,
-  Environment,
-  PerspectiveCamera,
-  Stats,
-} from "@react-three/drei";
 import "./App.css";
-import CustomPoints from "./components/CustomPoints";
-import { Canvas } from "@react-three/fiber";
-import { loremText, scrollText } from "./assets/text";
+import ShaderScene from "./components/shader-waves/WavesScene";
+import ScrollScene from "./components/scroll-morph/ScrollScene";
+import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
+import { folder } from "leva";
+import { createContext } from "react";
+
+const routes = [
+  {
+    name: "Select ↓",
+    path: "/",
+    element: <Navigate to={"/scroll-morph"} />,
+  },
+  {
+    name: "Scoll Morph",
+    path: "/scroll-morph",
+    element: <ScrollScene />,
+  },
+
+  {
+    name: "Shader Waves",
+    path: "/shader-waves",
+    element: <ShaderScene />,
+  },
+];
+
+export const DemoFoldersContext = createContext(null);
 
 function App() {
+  const navigate = useNavigate();
+
+  const demoFolders = {
+    "All Demos": folder({
+      selectDemo: {
+        options: Object.fromEntries(
+          routes.map((item) => [item.name, item.path])
+        ),
+        onChange: (path, _, options) =>
+          !options.initial &&
+          path !== "/" &&
+          path !== window.location.pathname &&
+          navigate(path),
+        onEditEnd: (e) => console.log(e),
+        order: 1,
+      },
+    }),
+  };
+
   return (
     <>
-      <div className="cover-text">
-        <div className="lorem-text">{loremText}</div>
-        <div className="scroll-text">
-          {scrollText} {scrollText}
-        </div>
-        <div className="lorem-text">{loremText}</div>
-      </div>
-
       <div className="attributions">
         <a
           href="https://github.com/fibre-ether"
@@ -35,30 +63,16 @@ function App() {
         </a>
       </div>
 
-      <Canvas
-        style={{
-          height: "100vh",
-          width: "100vw",
-          position: "fixed",
-          top: 0,
-          left: 0,
-          zIndex: 10,
-        }}>
-        <PerspectiveCamera makeDefault position={[0, 0, 30]} />
-        <Environment preset="apartment" />
-        <Scene />
-        {/* <OrbitControls /> */}
-        <Stats />
-      </Canvas>
+      <DemoFoldersContext.Provider value={demoFolders}>
+        <Routes>
+          <Route path="*" element={<Navigate to={routes[0].path} />} />
+          {routes.map((item, index) => {
+            return <Route {...item} key={index} />;
+          })}
+        </Routes>
+      </DemoFoldersContext.Provider>
     </>
   );
 }
 
-function Scene() {
-  return (
-    <Bounds fit clip observe margin={1.5}>
-      <CustomPoints />
-    </Bounds>
-  );
-}
 export default App;

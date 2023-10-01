@@ -1,9 +1,10 @@
-import { Points } from "@react-three/drei";
+import { Bounds, Environment, Points, Text } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
-import { useControls } from "leva";
+import { folder, useControls } from "leva";
 import { buffer } from "maath";
-import { useEffect, useRef, useState } from "react";
+import { Suspense, useContext, useEffect, useRef, useState } from "react";
 import { MathUtils, Quaternion, Vector3 } from "three";
+import { DemoFoldersContext } from "../../App";
 
 const makeBuffer = (...args) => Float32Array.from(...args);
 
@@ -75,14 +76,20 @@ function CustomPoints() {
     makeBuffer({ length: n }, () => Math.random() * 0.2)
   );
 
-  const { damping } = useControls({
-    damping: {
-      value: 0.05,
-      min: 0.01,
-      max: 0.1,
-      step: 0.01,
-    },
-  });
+  const demoFolders = useContext(DemoFoldersContext);
+
+  const [{ damping }] = useControls(() => ({
+    ...demoFolders,
+    config: folder({
+      damping: {
+        value: 0.05,
+        min: 0.01,
+        max: 0.1,
+        step: 0.01,
+      },
+    }),
+  }));
+
   let currentScroll = 0;
 
   useFrame((_, delta) => {
@@ -105,10 +112,24 @@ function CustomPoints() {
 
   return (
     <>
-      <Points positions={positionFinal} colors={color} sizes={size}>
-        {/* eslint-disable-next-line */}
-        <pointsMaterial vertexColors size={0.75} />
-      </Points>
+      <Suspense
+        fallback={
+          <Text
+            fontSize={5}
+            color={"#EC2D2D"}
+            outlineColor={"#ffffff"}
+            outlineWidth={0.2}>
+            Loading...
+          </Text>
+        }>
+        {/* <Environment preset="apartment" /> */}
+        <Bounds fit clip observe margin={1.5}>
+          <Points positions={positionFinal} colors={color} sizes={size}>
+            {/* eslint-disable-next-line */}
+            <pointsMaterial vertexColors size={0.75} />
+          </Points>
+        </Bounds>
+      </Suspense>
     </>
   );
 }
