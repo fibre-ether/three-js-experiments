@@ -6,12 +6,12 @@
 varying vec3 vNormal;
 
 void main() {
-    float strength1 = max(0.0,dot(LIGHT_DIRECTION1, vNormal) * 0.65);
-    float strength2 = max(0.0,dot(LIGHT_DIRECTION2, vNormal) * 0.65);
+    float strength1 = max(0.0,dot(LIGHT_DIRECTION1, vNormal) * 0.75);
+    float strength2 = max(0.0,dot(LIGHT_DIRECTION2, vNormal) * 0.75);
 
     float strength = strength1 + strength2;
 
-    vec3 color = mix(DARK_COLOR, BRIGHT_COLOR, pow(strength,1.1));
+    vec3 color = mix(DARK_COLOR, BRIGHT_COLOR, pow(strength,1.0));
 
     gl_FragColor = vec4(color,1.0);
 }

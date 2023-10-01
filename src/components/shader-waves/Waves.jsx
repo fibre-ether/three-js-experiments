@@ -65,12 +65,12 @@ function Waves() {
   }, [waveSpeed, randomness, waveDensity]);
 
   useFrame(({ clock }) => {
-    ref.current.rotation.z = clock.elapsedTime * 0.75;
-    ref.current.rotation.x = clock.elapsedTime * 0.5;
+    ref.current.rotation.z = clock.elapsedTime * 0.5;
+    ref.current.rotation.x = clock.elapsedTime * 0.35;
     material.uniforms.uTime.value = clock.elapsedTime;
   });
   return (
-    <Bounds fit clip observe margin={2.0}>
+    <Bounds fit clip observe margin={1.8}>
       {/* eslint-disable-next-line */}
       <mesh ref={ref} material={material}>
         <icosahedronGeometry
