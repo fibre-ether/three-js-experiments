@@ -4,6 +4,7 @@ import ScrollScene from "./components/scroll-morph/ScrollScene";
 import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
 import { folder } from "leva";
 import { createContext } from "react";
+import AudioVizScene from "./components/audio-viz/AudioVizScene";
 
 const routes = [
   {
@@ -11,6 +12,7 @@ const routes = [
     path: "/",
     element: <Navigate to={"/scroll-morph"} />,
   },
+
   {
     name: "Scoll Morph",
     path: "/scroll-morph",
@@ -21,6 +23,12 @@ const routes = [
     name: "Shader Waves",
     path: "/shader-waves",
     element: <ShaderScene />,
+  },
+
+  {
+    name: "Audio Visualizer",
+    path: "/audio-viz",
+    element: <AudioVizScene />,
   },
 ];
 
