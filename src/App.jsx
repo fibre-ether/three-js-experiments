@@ -5,6 +5,7 @@ import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
 import { folder } from "leva";
 import { createContext } from "react";
 import AudioVizScene from "./components/audio-viz/AudioVizScene";
+import RayTracerScene from "./components/ray-tracer/RayTracerScene";
 
 const routes = [
   {
@@ -29,6 +30,12 @@ const routes = [
     name: "Audio Visualizer",
     path: "/audio-viz",
     element: <AudioVizScene />,
+  },
+
+  {
+    name: "Ray Tracer",
+    path: "/ray-tracer",
+    element: <RayTracerScene />,
   },
 ];
 
