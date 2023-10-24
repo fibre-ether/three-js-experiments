@@ -1,32 +1,53 @@
 import { useKeyboardControls } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { useContext, useMemo, useRef } from "react";
-import { ShaderMaterial, Vector2, Vector3 } from "three";
+import { ShaderMaterial, Vector2, Vector3, Vector4 } from "three";
 import { button, folder, useControls } from "leva";
 import { DemoFoldersContext } from "../../App";
 
 import vertexShader from "./shaders/vertex.glsl";
 import fragmentShader from "./shaders/fragment.glsl";
 
+import rayClass from "./shaders/utils/ray.glsl";
+import hittableClass from "./shaders/utils/hittable.glsl";
+import defines from "./shaders/utils/defines.glsl";
+
+import shaderConcat from "../../utils/shaderConcat";
+
 function RayTracer() {
   const ref = useRef();
   const demoFolders = useContext(DemoFoldersContext);
   const [, get] = useKeyboardControls();
 
+  /* shader defaults */
   const glSize = new Vector2(0);
   const defaultCameraPosition = new Vector3(0);
+  const hittables = [
+    new Vector4(0, 0, -1, 0.5),
+    new Vector4(0, -100.5, -1, 100),
+  ];
 
+  /* Shader material */
   const material = useMemo(() => {
     return new ShaderMaterial({
       uniforms: {
         uTime: { value: 0 },
         uRenderSize: { value: glSize },
         uCameraPosition: { value: defaultCameraPosition },
+        uHittables: { value: hittables },
       },
       vertexShader,
-      fragmentShader,
+      fragmentShader: shaderConcat(
+        `#define NUM_HITTABLES ${hittables.length}`,
+        defines,
+        rayClass,
+        hittableClass,
+        fragmentShader
+      ),
     });
   }, []);
+
+  /* Controls */
   const [, set] = useControls(() => ({
     ...demoFolders,
     config: folder({
