@@ -33,8 +33,9 @@ bool hit(hittable self, float ray_tmin, float ray_tmax, inout hit_record rec, ra
     float c = dot(oc, oc) - self.radius * self.radius;
 
     float discriminant = half_b * half_b - a * c;
-    if (discriminant<0.0) return false;
-    
+    if(discriminant < 0.0)
+        return false;
+
     float sqrtd = sqrt(discriminant);
     float root = (-half_b - sqrtd) / a;
 
@@ -69,4 +70,25 @@ bool hit(hittable_list self, float ray_tmin, float ray_tmax, inout hit_record re
     }
 
     return hit_anything;
+}
+
+vec3 ray_color(ray r, hittable_list world) {
+    vec3 color = vec3(0.0);
+    float num_reflections = 0.0;
+    float reflectance = 0.5;
+
+    for(int i = 0; i < RECURSION_DEPTH; i++) {
+        hit_record rec;
+        if(hit(world, RAY_T_MIN, RAY_T_MAX, rec, r)) {
+            num_reflections += 1.0;
+            vec3 direction = rec.normal + random_on_hemisphere(r.direction, rec.normal);
+            r = ray(rec.p, direction);
+        } else {
+            vec3 unit_direction = normalize(r.direction);
+            float a = 0.5 * (unit_direction.y + 1.0);
+            vec3 background = (1.0 - a) * vec3(1.0) + a * vec3(0.5, 0.7, 1.0);
+            return pow(reflectance, num_reflections) * (color + background);
+        }
+    }
+    return pow(reflectance, num_reflections) * color;
 }

@@ -11,6 +11,7 @@ import fragmentShader from "./shaders/fragment.glsl";
 import rayClass from "./shaders/utils/ray.glsl";
 import hittableClass from "./shaders/utils/hittable.glsl";
 import defines from "./shaders/utils/defines.glsl";
+import utils from "./shaders/utils/utils.glsl";
 
 import shaderConcat from "../../utils/shaderConcat";
 
@@ -40,6 +41,7 @@ function RayTracer() {
       fragmentShader: shaderConcat(
         `#define NUM_HITTABLES ${hittables.length}`,
         defines,
+        utils,
         rayClass,
         hittableClass,
         fragmentShader
@@ -75,7 +77,7 @@ function RayTracer() {
   useFrame(({ clock, gl }) => {
     const { forward, back, left, right, up, down } = get();
 
-    defaultCameraPosition.setX(defaultCameraPosition.x + (left - right) * 0.01);
+    defaultCameraPosition.setX(defaultCameraPosition.x + (right - left) * 0.01);
 
     defaultCameraPosition.setY(defaultCameraPosition.y + (down - up) * 0.01);
 

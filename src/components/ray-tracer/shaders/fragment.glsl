@@ -1,15 +1,19 @@
 float focal_length = 1.0;
 float viewport_height = 2.0;
 
-vec3 ray_color(ray r, hittable_list world) {
-    hit_record rec;
-    if(hit(world, RAY_T_MIN, RAY_T_MAX, rec, r)) {
-        return 0.5 * (rec.normal + vec3(1.0));
-    }
+vec3 pixel_sample_square(vec3 delta_u, vec3 delta_v, float sample_index) {
+    float px = -0.5 + random(delta_u+sample_index);
+    float py = -0.5 + random(delta_v+sample_index);
+    return (px * delta_u) + (py * delta_v);
+}
+ray get_ray(float i, float j, vec3 center, vec3 loc_00, vec3 delta_u, vec3 delta_v, float sample_index) {
+    vec3 pixel_center = loc_00 + (i * delta_u) + (j * delta_v);
+    vec3 pixel_sample = pixel_center + pixel_sample_square(delta_u, delta_v, sample_index);
 
-    vec3 unit_direction = normalize(r.direction);
-    float a = 0.5 * (unit_direction.y + 1.0);
-    return (1.0 - a) * vec3(1.0) + a * vec3(0.5, 0.7, 1.0);
+    vec3 ray_origin = center;
+    vec3 ray_direction = pixel_sample - ray_origin;
+
+    return ray(ray_origin, ray_direction);
 }
 
 void main() {
@@ -40,6 +44,13 @@ void main() {
     hittable_list world;
     generate_hittables(world, uHittables);
 
-    vec3 pixel_color = ray_color(r, world);
+    vec3 pixel_color = vec3(0.0);
+    for(int i = 0; i < SAMPLE_PER_PIXEL; ++i) {
+        ray r = get_ray(pixel_x, pixel_y,camera , pixel00_loc, pixel_delta_u, pixel_delta_v, float(i));
+        pixel_color += ray_color(r, world);
+    }
+
+    pixel_color /= float(SAMPLE_PER_PIXEL);
+    //ray_color(r, world);
     gl_FragColor = vec4(pixel_color, 1.0);
 }
