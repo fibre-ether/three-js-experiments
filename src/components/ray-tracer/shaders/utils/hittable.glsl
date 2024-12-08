@@ -1,22 +1,6 @@
-struct hit_record {
-    vec3 p;
-    vec3 normal;
-    float t;
-    bool front_face;
-};
-
-struct hittable {
-    vec3 center;
-    float radius;
-};
-
-struct hittable_list {
-    hittable objects[NUM_HITTABLES];
-};
-
-void generate_hittables(inout hittable_list self, vec4 hittables[NUM_HITTABLES]) {
+void generate_hittables(inout hittable_list self, HittableJS hittables[NUM_HITTABLES]) {
     for(int i = 0; i < NUM_HITTABLES; i++) {
-        self.objects[i] = hittable(hittables[i].xyz, hittables[i].w);
+        self.objects[i] = hittable(hittables[i].center, hittables[i].radius, hittables[i].material, hittables[i].color);
     }
 }
 
@@ -47,6 +31,8 @@ bool hit(hittable self, float ray_tmin, float ray_tmax, inout hit_record rec, ra
 
     rec.t = root;
     rec.p = ray_at(r, rec.t);
+    rec.color = self.color;
+    rec.material = self.material;
     vec3 outward_normal = (rec.p - self.center) / self.radius;
     set_face_normal(rec, r, outward_normal);
 
@@ -73,22 +59,27 @@ bool hit(hittable_list self, float ray_tmin, float ray_tmax, inout hit_record re
 }
 
 vec3 ray_color(ray r, hittable_list world) {
-    vec3 color = vec3(0.0);
+    vec3 color = vec3(1.0, 1.0, 1.0);
+    vec3 BLACK = vec3(0.0, 0.0, 0.0);
+    vec3 WHITE = vec3(1.0, 1.0, 1.0);
     float num_reflections = 0.0;
     float reflectance = 0.5;
 
     for(int i = 0; i < RECURSION_DEPTH; i++) {
         hit_record rec;
-        if(hit(world, RAY_T_MIN, RAY_T_MAX, rec, r)) {
+        bool did_hit = hit(world, RAY_T_MIN, RAY_T_MAX, rec, r);
+        bool is_light = rec.material == 2;
+        if(did_hit && !is_light) {
             num_reflections += 1.0;
-            vec3 direction = rec.normal + random_on_hemisphere(r.direction, rec.normal);
-            r = ray(rec.p, direction);
+            r = ray(rec.p, get_reflected_direction(rec, r));
+            color *= rec.color;
         } else {
-            vec3 unit_direction = normalize(r.direction);
-            float a = 0.5 * (unit_direction.y + 1.0);
-            vec3 background = (1.0 - a) * vec3(1.0) + a * vec3(0.5, 0.7, 1.0);
-            return pow(reflectance, num_reflections) * (color + background);
+            // vec3 unit_direction = normalize(r.direction);
+            vec3 return_color = !did_hit ? color * get_background(normalize(r.direction)) : rec.color;
+            // return pow(reflectance, num_reflections) * (color * (float(did_hit) * rec.color));
+            return pow(reflectance, num_reflections) * (return_color);
+            
         }
     }
-    return pow(reflectance, num_reflections) * color;
+    return pow(reflectance, num_reflections) * BLACK;
 }

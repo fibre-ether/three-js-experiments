@@ -22,11 +22,16 @@ function RayTracer() {
 
   /* shader defaults */
   const glSize = new Vector2(0);
-  const defaultCameraPosition = new Vector3(0);
+  const defaultCameraPosition = new Vector3(0, 0.5, 1);
+  const newCameraPosition = new Vector3(0, 0.5, 1);
   const hittables = [
-    new Vector4(0, 0, -1, 0.5),
-    new Vector4(0, -100.5, -1, 100),
-  ];
+    {center: new Vector3(-1, 0, -0.5), radius: 0.5, material: 1, color: new Vector3(1, 1, 0)},
+    {center: new Vector3(0, 0, -1), radius: 0.5, material: 0, color: new Vector3(0, 1, 0)},
+    {center: new Vector3(1, 0, -0.5), radius: 0.5, material: 1, color: new Vector3(0, 0, 1)},
+    {center: new Vector3(0, -0.5, -0.5), radius: 0.1, material: 2, color: new Vector3(1, 1, 1)},
+    {center: new Vector3(0, 0, -7), radius: 5, material: 2, color: new Vector3(0.25, 1, 0.5)},
+    {center: new Vector4(0, -100.5, -1), radius: 100, material: 0, color: new Vector3(1, 1, 1)}
+  ]
 
   /* Shader material */
   const material = useMemo(() => {
@@ -36,13 +41,14 @@ function RayTracer() {
         uRenderSize: { value: glSize },
         uCameraPosition: { value: defaultCameraPosition },
         uHittables: { value: hittables },
+        uSkyBrightness: {value: 1.0}
       },
       vertexShader,
       fragmentShader: shaderConcat(
         `#define NUM_HITTABLES ${hittables.length}`,
         defines,
-        utils,
         rayClass,
+        utils,
         hittableClass,
         fragmentShader
       ),
@@ -54,14 +60,23 @@ function RayTracer() {
     ...demoFolders,
     config: folder({
       cameraPosition: {
-        value: { x: 0, y: 0, z: 0 },
+        value: { x: newCameraPosition.x, y: newCameraPosition.y, z: newCameraPosition.z },
         onChange: (e) => {
-          defaultCameraPosition.set(e.x, e.y, e.z);
-          material.uniforms.uCameraPosition.value = defaultCameraPosition;
+          newCameraPosition.set(e.x, e.y, e.z);
+          material.uniforms.uCameraPosition.value = newCameraPosition;
         },
       },
+      'Sky Brightness': {
+        value: 1.0,
+        onChange: (e) => {
+          material.uniforms.uSkyBrightness.value = e;
+        },
+        max: 1.0,
+        min: 0.0,
+      },
       reset: button(() => {
-        defaultCameraPosition.set(0, 0, 0);
+        console.log(defaultCameraPosition.x, defaultCameraPosition.y, defaultCameraPosition.z);
+        defaultCameraPosition.set(defaultCameraPosition.x, defaultCameraPosition.y, defaultCameraPosition.z);
         material.uniforms.uCameraPosition.value = defaultCameraPosition;
         set({
           cameraPosition: {
@@ -77,20 +92,18 @@ function RayTracer() {
   useFrame(({ clock, gl }) => {
     const { forward, back, left, right, up, down } = get();
 
-    defaultCameraPosition.setX(defaultCameraPosition.x + (right - left) * 0.01);
+    newCameraPosition.setX(newCameraPosition.x + (right - left) * 0.01);
 
-    defaultCameraPosition.setY(defaultCameraPosition.y + (down - up) * 0.01);
+    newCameraPosition.setY(newCameraPosition.y + (down - up) * 0.01);
 
-    defaultCameraPosition.setZ(
-      defaultCameraPosition.z + (back - forward) * 0.01
-    );
+    newCameraPosition.setZ(newCameraPosition.z + (back - forward) * 0.01);
 
-    material.uniforms.uCameraPosition.value = defaultCameraPosition;
+    material.uniforms.uCameraPosition.value = newCameraPosition;
     set({
       cameraPosition: {
-        x: defaultCameraPosition.x,
-        y: defaultCameraPosition.y,
-        z: defaultCameraPosition.z,
+        x: newCameraPosition.x,
+        y: newCameraPosition.y,
+        z: newCameraPosition.z,
       },
     });
     // console.log(forward, back);

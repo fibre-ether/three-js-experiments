@@ -51,6 +51,5 @@ void main() {
     }
 
     pixel_color /= float(SAMPLE_PER_PIXEL);
-    //ray_color(r, world);
     gl_FragColor = vec4(pixel_color, 1.0);
 }

@@ -1,6 +1,7 @@
 float hash12(vec2 p) {
     vec3 p3 = fract(vec3(p.xyx) * .1031);
-    p3 += dot(p3, p3.yzx + 33.33);
+    // p3 += dot(p3, p3.yzx + 33.33);
+    p3 += dot(p3, p3.yzx + 33.33 + fract(uTime));
     return fract((p3.x + p3.y) * p3.z);
 }
 
@@ -30,21 +31,27 @@ vec3 random_3d(vec3 st, float min, float max) {
 
 vec3 random_unit_vector(vec3 ray) {
     return normalize(random_3d(random_3d(ray, -1.0, 1.0),-1.0,1.0));
-    // while(true) {
-    //     vec3 p = random_3d(random_3d(ray, -1.0, 1.0), -1.0,1.0);
-    //     if(dot(p, p) < 1.0) {
-    //         return normalize(p);
-    //     }
-    // }
 }
 
 vec3 random_on_hemisphere(vec3 ray, vec3 normal) {
     vec3 unit_vector = random_unit_vector(ray);
+    // vec3 unit_vector = vec3(1.0, 1.0 , 1.0);
     float is_vector_on_hemi = float(dot(unit_vector, normal) > 0.0);
     return is_vector_on_hemi * unit_vector + (1.0-is_vector_on_hemi)*(-unit_vector);
-    // if(dot(unit_vector, normal) > 0.0) {
-    //     return unit_vector;
-    // } else {
-    //     return -unit_vector;
-    // }
+}
+
+vec3 get_background(vec3 ray_unit) {
+    float a = 0.5 * (ray_unit.y + 1.0);
+    return ((1.0 - a) * vec3(1.0) + a * vec3(0.5, 0.7, 1.0)) * uSkyBrightness;
+}
+
+vec3 get_reflected_direction(hit_record rec, ray r) {
+    switch (rec.material) {
+      case 0:
+        return rec.normal + random_on_hemisphere(r.direction, rec.normal);
+      case 1:
+        float roughness = 0.01;
+        vec3 reflected = r.direction - 2.0*dot(r.direction, rec.normal)*rec.normal;
+        return normalize(reflected) + (roughness * random_unit_vector(reflected));
+    }
 }
